@@ -1,28 +1,31 @@
-const http = require('http');
-const fs = require('fs');
+
+const express = require('express');
 const path = require('path');
 
-const server = http.createServer((req, res) => {
-  const routes = {
-    '/': 'index.html',
-    '/contact_me': 'contact_me.html',
-    '/about': 'about.html',
-  };
+const app = express();
 
-  const fileName = routes[req.url] || '404.html'; // 如果路径不存在，使用 404 页面
-  const filePath = path.join(__dirname, fileName);
+// 静态文件目录
+app.use(express.static(path.join(__dirname, 'public')));
 
-  fs.readFile(filePath, (error, data) => {
-    if (error) {
-      res.statusCode = 500;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Internal Server Error');
-    } else {
-      res.statusCode = fileName === '404.html' ? 404 : 200; // 根据文件是否是 404.html 设置状态码
-      res.setHeader('Content-Type', 'text/html');
-      res.end(data);
-    }
-  });
+// 路由定义
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-server.listen(8080, () => console.log('Server is running on port 8080'));
+app.get('/contact_me', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'contact_me.html'));
+});
+
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+
+// 404 页面
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
+// 启动服务器
+app.listen(8080, () => {
+  console.log('Server is running on port 8080');
+});
